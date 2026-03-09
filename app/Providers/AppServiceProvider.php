@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Policies\TrafficReportPolicies;
+use App\Policies\ViolationTypePolicies;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
