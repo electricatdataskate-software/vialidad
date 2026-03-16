@@ -14,7 +14,7 @@ class ViolationTypePolicies
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('violations.view_any');
     }
 
     /**
@@ -22,7 +22,7 @@ class ViolationTypePolicies
      */
     public function view(User $user, ViolationType $violationType): bool
     {
-        return false;
+        return $user->can('violations.view');
     }
 
     /**
@@ -30,7 +30,7 @@ class ViolationTypePolicies
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('violations.create');
     }
 
     /**
@@ -38,7 +38,7 @@ class ViolationTypePolicies
      */
     public function update(User $user, ViolationType $violationType): bool
     {
-        return false;
+        return $user->can('violations.update');;
     }
 
     /**
@@ -46,7 +46,7 @@ class ViolationTypePolicies
      */
     public function delete(User $user, ViolationType $violationType): bool
     {
-        return false;
+        return $user->can('violations.delete');
     }
 
     /**
