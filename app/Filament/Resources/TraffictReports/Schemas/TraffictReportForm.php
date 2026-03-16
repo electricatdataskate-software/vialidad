@@ -25,7 +25,7 @@ class TraffictReportForm
                     ->searchable(),
 
                 DateTimePicker::make('occurred_at')
-                ->label('Momento del echo'),
+                    ->label('Momento del echo'),
 
                 Select::make('location_id')
                     ->label('Location')
@@ -54,9 +54,11 @@ class TraffictReportForm
                             ->columnSpanFull(),
 
                         TextInput::make('lat')
+                            ->hidden()
                             ->readOnly(),
 
                         TextInput::make('lng')
+                            ->hidden()
                             ->readOnly(),
 
                         TextInput::make('address')
