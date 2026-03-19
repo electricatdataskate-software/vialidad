@@ -17,69 +17,74 @@ class TraffictReportForm
         return $schema
             ->components([
 
-                Select::make('violation_type_id')
-                    ->label('Violation Type')
-                    ->relationship('violationType', 'name')
-                    ->required()
-                    ->preload()
-                    ->searchable(),
+            Select::make('violation_type_id')
+            ->label('Violation Type')
+            ->relationship('violationType', 'name')
+            ->required()
+            ->preload()
+            ->searchable(),
 
-                DateTimePicker::make('occurred_at')
-                    ->label('Momento del echo'),
+            DateTimePicker::make('occurred_at')
+            ->default(now())
+            ->label('Momento del echo'),
 
-                Select::make('location_id')
-                    ->label('Location')
-                    ->relationship('location', 'address')
-                    ->searchable()
-                    ->createOptionForm([
-                        Pinpoint::make('location')
-                            ->label('Location')
-                            ->defaultLocation(-34.6037, -58.3816) // Buenos Aires
-                            ->defaultZoom(15)
-                            ->height(400)
-                            ->draggable()
-                            ->searchable()
-                            ->latField('lat')
-                            ->lngField('lng')
-                            ->addressField('address')
-                            ->shortAddressField('short_address')
-                            ->provinceField('province')
-                            ->cityField('city')
-                            ->districtField('district')
-                            ->villageField('village')
-                            ->postalCodeField('postal_code')
-                            ->countryField('country')
-                            ->streetField('street')
-                            ->streetNumberField('street_number')
-                            ->columnSpanFull(),
+            Select::make('location_id')
+            ->label('Location')
+            ->relationship('location', 'address')
+            ->searchable()
+            ->createOptionForm([
+                Pinpoint::make('location')
+                ->label('Location')
+                ->defaultLocation(-34.6037, -58.3816) // Buenos Aires
+                ->defaultZoom(15)
+                ->height(400)
+                ->draggable()
+                ->searchable()
+                ->latField('lat')
+                ->lngField('lng')
+                ->addressField('address')
+                ->shortAddressField('short_address')
+                ->provinceField('province')
+                ->cityField('city')
+                ->districtField('district')
+                ->villageField('village')
+                ->postalCodeField('postal_code')
+                ->countryField('country')
+                ->streetField('street')
+                ->streetNumberField('street_number')
+                ->columnSpanFull(),
 
-                        TextInput::make('lat')
-                            ->hidden()
-                            ->readOnly(),
+                TextInput::make('lat')
+                ->label('Latitud')
+                ->required()
+                ->readOnly(),
 
-                        TextInput::make('lng')
-                            ->hidden()
-                            ->readOnly(),
+                TextInput::make('lng')
+                ->label('Longitud')
+                ->required()
+                ->readOnly(),
 
-                        TextInput::make('address')
-                            ->readOnly()
-                            ->columnSpanFull(),
-                    ]),
+                TextInput::make('address')
+                ->label('Dirección Detectada')
+                ->required()
+                ->readOnly()
+                ->columnSpanFull(),
+            ]),
 
-                Textarea::make('description')
-                    ->label('Description')
-                    ->rows(4)
-                    ->columnSpanFull(),
-                SpatieMediaLibraryFileUpload::make('evidence_images')
-                    ->collection('evidence_images')
-                    ->multiple()
-                    ->image()
-                    ->disk('public'),
+            Textarea::make('description')
+            ->label('Description')
+            ->rows(4)
+            ->columnSpanFull(),
+            SpatieMediaLibraryFileUpload::make('evidence_images')
+            ->collection('evidence_images')
+            ->multiple()
+            ->image()
+            ->disk('public'),
 
-                SpatieMediaLibraryFileUpload::make('evidence_videos')
-                    ->collection('evidence_videos')
-                    ->multiple()
-                    ->disk('public'),
-            ]);
+            SpatieMediaLibraryFileUpload::make('evidence_videos')
+            ->collection('evidence_videos')
+            ->multiple()
+            ->disk('public'),
+        ]);
     }
 }
