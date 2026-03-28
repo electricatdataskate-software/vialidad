@@ -35,5 +35,6 @@ class TrafficReport extends Model implements HasMedia
     protected $casts = [
         'status' => TrafficReportStatus::class,
         'classification' => Classification::class,
+        'occurred_at' => 'datetime',
     ];
 }

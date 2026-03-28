@@ -71,13 +71,28 @@ class TraffictReportResource extends Resource
                                     TextEntry::make('reportedBy.email')
                                 ]),
 
-                            Section::make()
+                            Section::make('Resultados de Revisión')
                                 ->schema([
-                                    TextEntry::make('status')->badge(),
+                                    TextEntry::make('status')
+                                        ->badge(),
                                     TextEntry::make('classification')
                                         ->visible(fn($state) => $state)
                                         ->badge(),
-
+                                    TextEntry::make('reviewedBy.name')
+                                        ->label('Revisado por')
+                                        ->visible(fn($state) => $state),
+                                    TextEntry::make('reviewed_at')
+                                        ->label('Revisado el')
+                                        ->dateTime()
+                                        ->visible(fn($state) => $state),
+                                    TextEntry::make('review_notes')
+                                        ->label('Notas de revisión')
+                                        ->visible(fn($state) => $state)
+                                        ->columnSpanFull(),
+                                    TextEntry::make('administrative_action')
+                                        ->label('Acción administrativa')
+                                        ->visible(fn($state) => $state)
+                                        ->columnSpanFull(),
                                 ])
                                 ->columns(2),
 
@@ -99,13 +114,29 @@ class TraffictReportResource extends Resource
                         ]),
 
                     Tab::make('actions')
-                        ->hidden(fn() => auth()->user()->hasRole(UserRole::User))
+                        ->hidden(fn() => auth()->user()->hasRole(UserRole::User->value))
                         ->label('Acciones')
                         ->schema([
-                            Section::make('accitons')
-                                ->label('Acciones')
+                            Section::make('Acciones de Revisión')
+                                ->description('Cambiar el estado de la denuncia y agregar notas de revisión.')
                                 ->footerActions([
-                                    Action::make('accept')
+                                    Action::make('under_review')
+                                        ->label('En revisión')
+                                        ->color('primary')
+                                        ->hidden(fn($record) => $record->status === TrafficReportStatus::UnderReview)
+                                        ->action(function ($record) {
+                                            $record->status = TrafficReportStatus::UnderReview;
+                                            $record->save();
+
+                                            Notification::make()
+                                                ->title('Denuncia puesta en revisión')
+                                                ->success()
+                                                ->send();
+                                        }),
+                                    Action::make('reject')
+                                        ->label('Rechazar')
+                                        ->color('danger')
+                                        ->hidden(fn($record) => $record->status === TrafficReportStatus::Rejected)
                                         ->schema([
                                             Select::make('classification')
                                                 ->required()
@@ -118,20 +149,49 @@ class TraffictReportResource extends Resource
                                                 ->required(),
                                         ])
                                         ->action(function ($record, $data) {
-                                            if (auth()->user()->hasRole(UserRole::User))
-                                                return Notification::make('unauthorized')
-                                                    ->danger()
-                                                    ->body('Usuario no Autorizado')
-                                                    ->send();
-
                                             $record->classification = $data['classification'];
                                             $record->administrative_action = $data['administrative_action'];
                                             $record->review_notes = $data['review_notes'];
                                             $record->reviewed_at = now();
-                                            $record->status = TrafficReportStatus::Resolved;
                                             $record->reviewed_by = auth()->id();
+                                            $record->status = TrafficReportStatus::Rejected;
 
                                             $record->save();
+
+                                            Notification::make()
+                                                ->title('Denuncia rechazada')
+                                                ->success()
+                                                ->send();
+                                        }),
+                                    Action::make('accept')
+                                        ->label('Aceptar')
+                                        ->color('success')
+                                        ->hidden(fn($record) => $record->status === TrafficReportStatus::Resolved)
+                                        ->schema([
+                                            Select::make('classification')
+                                                ->required()
+                                                ->options(Classification::class),
+
+                                            Textarea::make('review_notes')
+                                                ->required(),
+
+                                            Textarea::make('administrative_action')
+                                                ->required(),
+                                        ])
+                                        ->action(function ($record, $data) {
+                                            $record->classification = $data['classification'];
+                                            $record->administrative_action = $data['administrative_action'];
+                                            $record->review_notes = $data['review_notes'];
+                                            $record->reviewed_at = now();
+                                            $record->reviewed_by = auth()->id();
+                                            $record->status = TrafficReportStatus::Resolved;
+
+                                            $record->save();
+
+                                            Notification::make()
+                                                ->title('Denuncia aceptada')
+                                                ->success()
+                                                ->send();
                                         })
                                 ])
                         ])

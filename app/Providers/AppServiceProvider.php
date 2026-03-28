@@ -22,6 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        \App\Models\Reports\TrafficReport::observe(\App\Observers\TrafficReportObserver::class);
     }
 }
