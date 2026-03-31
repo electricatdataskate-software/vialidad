@@ -14,14 +14,20 @@ class TrafficReportObserver
      */
     public function updated(TrafficReport $report): void
     {
-        if ($report->wasChanged('status')) {
+        if (!$report->wasChanged('status')) return;
 
+        $report->refresh();
+
+
+        if ($report->reportedBy) {
             $report->reportedBy->notify(
                 new NotifyUpdateReportStatusSimpleUser($report)
             );
+        }
 
-            if ($report->classification->emails_to_notify) {
-                Mail::to($report->classification->emails_to_notify)
+        if ($report->classification?->emails_to_notify) {
+            foreach ($report->classification->emails_to_notify as $email) {
+                Mail::to($email)
                     ->send(new ReportStatusUpdated($report));
             }
         }
