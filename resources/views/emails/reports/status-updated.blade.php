@@ -29,9 +29,8 @@
             <h1>Actualización de Reporte</h1>
             <p>Hola {{ $report->reportedBy->name }}, el estado de tu reporte ha cambiado.</p>
         </div>
-
         <div style="text-align: center;">
-            <span class="status-badge status-{{ $report->status->value }}">
+            <span class="status-badge status-{{ $report?->status?->value }}">
                 {{ $report->status->getLabel() }}
             </span>
         </div>
@@ -47,7 +46,7 @@
             </div>
             <div class="info-item">
                 <span class="info-label">Fecha del Suceso</span>
-                <span class="info-value">{{ $report->occurred_at->format('d/m/Y H:i') }}</span>
+                <span class="info-value">{{ $report->occurred_at && $report->occurred_at->format('d/m/Y H:i') }}</span>
             </div>
         </div>
 

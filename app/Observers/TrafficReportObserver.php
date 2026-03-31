@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Mail\ReportStatusUpdated;
 use App\Models\Reports\TrafficReport;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\NotifyUpdateReportStatusSimpleUser;
 
 class TrafficReportObserver
 {
@@ -13,12 +14,20 @@ class TrafficReportObserver
      */
     public function updated(TrafficReport $report): void
     {
-        if ($report->isDirty('status')) {
-            $user = $report->reportedBy;
+        if ($report->wasChanged('status')) {
 
-            if ($user && $user->email) {
-                Mail::to($user->email)->send(new ReportStatusUpdated($report));
+            $report->reportedBy->notify(
+                new NotifyUpdateReportStatusSimpleUser($report)
+            );
+
+            if ($report->classification->emails_to_notify) {
+                Mail::to($report->classification->emails_to_notify)
+                    ->send(new ReportStatusUpdated($report));
             }
         }
+    }
+    public function created(TrafficReport $report): void
+    {
+        $report->reportedBy->notify(new NotifyUpdateReportStatusSimpleUser($report));
     }
 }

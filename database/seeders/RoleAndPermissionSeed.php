@@ -68,6 +68,13 @@ class RoleAndPermissionSeed extends Seeder
             'violations.create',
             'violations.update',
             'violations.delete',
+
+            // Classifications
+            'classifications.view',
+            'classifications.view_any',
+            'classifications.create',
+            'classifications.update',
+            'classifications.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -107,6 +114,13 @@ class RoleAndPermissionSeed extends Seeder
             'violations.create',
             'violations.update',
             'violations.delete',
+
+            // Classifications
+            'classifications.view',
+            'classifications.view_any',
+            'classifications.create',
+            'classifications.update',
+            'classifications.delete',
         ]);
         $this->command->info('Permissions assigned to role: admin');
 
@@ -115,6 +129,10 @@ class RoleAndPermissionSeed extends Seeder
             'traffic_reports.view_any',
             'traffic_reports.update',
             'traffic_reports.validate',
+
+            //Classifications
+            'classifications.view',
+            'classifications.view_any',
         ]);
         $this->command->info('Permissions assigned to role: supervisor');
 

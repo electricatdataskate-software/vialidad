@@ -24,7 +24,7 @@ return new class extends Migration
 
             // administrative fields
             $table->string('status')->default(TrafficReportStatus::Pending->value);
-            $table->string('classification')->nullable(); // minor | major | critical
+            $table->foreignId('classification_id')->nullable()->constrained()->onDelete('set null'); // minor | major | critical
             $table->string('administrative_action')->nullable(); // warning | observation | derived
 
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->onDelete('set null');

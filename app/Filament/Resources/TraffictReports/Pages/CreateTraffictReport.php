@@ -14,4 +14,9 @@ class CreateTraffictReport extends CreateRecord
         $data['reported_by'] = auth()->id();
         return $data;
     }
+
+    public function canCreateAnother(): bool
+    {
+        return false;
+    }
 }

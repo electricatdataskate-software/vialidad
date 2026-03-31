@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ViolationTypes\Tables;
 
+use App\Notifications\UpdateReportStatusSimpleUser;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -23,6 +25,10 @@ class ViolationTypesTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('email')
+                    ->action(function ($record) {
+                        auth()->user()->notify(new UpdateReportStatusSimpleUser($record));
+                    })
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
