@@ -17,18 +17,18 @@ El proyecto **Vialidad** es una plataforma centralizada para la gestión de inci
 
 ## 📂 3. Análisis Detallado de Módulos y Modelos
 
-### 📄 3.1 Denuncias de Tráfico ([TrafficReport](cci:2://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Models/Reports/TrafficReport.php:13:0-38:1))
+### 📄 3.1 Denuncias de Tráfico
 Es la entidad principal del sistema que registra cada incidente vial.
 - **Funciones y Lógica:**
   - `HasMediaFiles`: Trait encargado de gestionar las colecciones de archivos `evidence_images` (fotos) y `evidence_videos` (videos).
-  - `HasTrafficReportRelations`: Administra las relaciones con el denunciante ([reportedBy](cci:1://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Models/Reports/Traits/HasTrafficReportRelations.php:11:4-14:5)), el revisor ([reviewedBy](cci:1://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Models/Reports/Traits/HasTrafficReportRelations.php:16:4-19:5)), el tipo de infracción y la ubicación.
+  - `HasTrafficReportRelations`: Administra las relaciones con el denunciante, el revisor, el tipo de infracción y la ubicación.
 - **Campos Clave:** Descripción del hecho, fecha/hora del suceso (`occurred_at`), estado y clasificación de gravedad.
 
-### 🗂️ 3.2 Tipos de Infracción ([ViolationType](cci:2://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Models/Reports/ViolationType.php:9:0-22:1))
+### 🗂️ 3.2 Tipos de Infracción
 Define el catálogo de faltas (ej: Exceso de velocidad, Semáforo en rojo).
 - **Funciones:** Permite activar o desactivar categorías mediante el campo `is_active` y se vincula con múltiples reportes.
 
-### 📍 3.3 Ubicaciones ([Location](cci:2://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Models/Reports/Location.php:7:0-31:1))
+### 📍 3.3 Ubicaciones
 Almacena datos geoespaciales precisos.
 - **Detalle:** Guarda latitud, longitud, dirección completa, provincia, ciudad, barrio y número de calle. Esta granularidad permite realizar análisis estadísticos por zonas.
 
@@ -55,13 +55,13 @@ Determina el impacto de la falta: **Leve**, **Grave** o **Muy Grave**. Estos val
 
 ## 🖥️ 5. Panel Administrativo y Funciones de Filament
 
-### 🛠️ 5.1 Recurso de Denuncias ([TraffictReportResource](cci:2://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Filament/Resources/TraffictReports/TraffictReportResource.php:34:0-180:1))
+### 🛠️ 5.1 Recurso de Denuncias
 Este módulo es el más complejo y contiene lógica avanzada:
-- **Filtrado de Datos ([getEloquentQuery](cci:1://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Filament/Resources/TraffictReports/TraffictReportResource.php:143:4-155:5)):** Implementa seguridad a nivel de base de datos. Si el usuario logueado es un "Usuario" común, la consulta se filtra automáticamente para que **solo vea sus propios registros**. Los Administradores y Supervisores ven todo.
-- **Vista de Detalles ([infolist](cci:1://file://wsl.localhost/Ubuntu/home/pablodonato/vialidad/app/Filament/Resources/TraffictReports/TraffictReportResource.php:47:4-141:5)):**
+- **Filtrado de Datos** Implementa seguridad a nivel de base de datos. Si el usuario logueado es un "Usuario" común, la consulta se filtra automáticamente para que **solo vea sus propios registros**. Los Administradores y Supervisores ven todo.
+- **Vista de Detalles**
   - Utiliza **Pestañas (Tabs)** para mostrar información general, fotos y videos de forma organizada.
   - Implementa un **Mapa dinámico** para visualizar el sitio exacto del incidente.
-- **Acción de Aprobación (`Action::accept`):** 
+- **Acción de Aprobación** 
   - Función que lanza un modal donde el supervisor debe asignar la clasificación, cargar notas de revisión y detallar la acción administrativa. Al ejecutarse, actualiza automáticamente la fecha de revisión y el estado a `Resolved`.
 
 ---
@@ -82,4 +82,24 @@ El proyecto utiliza el sistema de **Policies** de Laravel vinculado directamente
 6. Servidor: `php artisan serve`
 
 ---
-*Última actualización: 18 de Marzo de 2026*
+
+## 📊 8. Dashboard y Estadísticas (Widgets)
+El panel principal ("Escritorio") incluye herramientas de visualización de datos en tiempo real para la toma de decisiones:
+
+### 🗺️ 8.1 Mapa Global de Reportes
+Visualiza geográficamente todos los incidentes reportados en el sistema.
+- **Tecnología:** Integración personalizada con **Leaflet.js** y **OpenStreetMap**.
+- **Funcionalidades:**
+  - Carga asíncrona de marcadores con popups informativos.
+  - Ajuste automático de zoom para encuadrar todos los puntos activos.
+  - Filtro interno para asegurar que solo se muestren reportes con coordenadas válidas.
+- **Configuración:**
+
+### 📈 8.2 Gráfico de Localidades
+Muestra estadística comparativa de la incidencia vial por zona geográfica.
+- **Tipo:** Gráfico de barras interactivo (Bar Chart).
+- **Lógica:** Agrupa y cuenta los reportes por ciudad/barrio, mostrando el **Top 10** de las zonas con mayor conflictividad.
+- **Estética:** Utiliza una paleta de colores personalizada de alta fidelidad visual (Indigo, Violet, Pink, Rose) para mejorar la legibilidad y el impacto visual.
+
+---
+*Última actualización: 5 de Abril de 2026*

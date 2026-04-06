@@ -18,19 +18,24 @@ class UserSeed extends Seeder
         User::factory()->withRole('admin')->create([
             'name' => 'Admin User',
             'email' => 'admin@gmail.com',
+            'password' => Hash::make('password'),
         ]);
 
         User::factory()->withRole('supervisor')->create([
             'name' => 'Supervisor User',
             'email' => 'supervisor@gmail.com',
+            'password' => Hash::make('password'),
+
         ]);
 
         User::factory()->withRole('user')->create([
             'name' => 'Regular User',
             'email' => 'user@gmail.com',
+            'password' => Hash::make('password'),
+
         ]);
 
-        
+
         $this->command->info('User seeding completed successfully.');
     }
 }
