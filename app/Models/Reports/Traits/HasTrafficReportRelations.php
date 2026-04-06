@@ -2,6 +2,7 @@
 
 namespace App\Models\Reports\Traits;
 
+use App\Models\Reports\Classification;
 use App\Models\Reports\Location;
 use App\Models\Reports\ViolationType;
 use App\Models\User;
@@ -27,5 +28,10 @@ trait HasTrafficReportRelations
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function classification()
+    {
+        return $this->belongsTo(Classification::class, 'classification_id');
     }
 }

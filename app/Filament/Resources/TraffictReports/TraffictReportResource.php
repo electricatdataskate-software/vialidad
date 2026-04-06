@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\TraffictReports;
 
-use App\Enums\Classification;
 use App\Enums\TrafficReportStatus;
 use App\Enums\UserRole;
 use App\Filament\Resources\TraffictReports\Pages\CreateTraffictReport;
@@ -11,18 +10,17 @@ use App\Filament\Resources\TraffictReports\Pages\ListTraffictReports;
 use App\Filament\Resources\TraffictReports\Pages\ViewTrafficReportResource;
 use App\Filament\Resources\TraffictReports\Schemas\TraffictReportForm;
 use App\Filament\Resources\TraffictReports\Tables\TraffictReportsTable;
+use App\Models\Reports\Classification;
 use App\Models\Reports\TrafficReport;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Infolists;
 use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
@@ -30,7 +28,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Support\Enums\Size;
+use Illuminate\Support\Facades\Log;
 
 class TraffictReportResource extends Resource
 {
@@ -75,7 +73,8 @@ class TraffictReportResource extends Resource
                                 ->schema([
                                     TextEntry::make('status')
                                         ->badge(),
-                                    TextEntry::make('classification')
+                                    TextEntry::make('classification.name')
+                                        ->label('Clasificación')
                                         ->visible(fn($state) => $state)
                                         ->badge(),
                                     TextEntry::make('reviewedBy.name')
@@ -138,9 +137,9 @@ class TraffictReportResource extends Resource
                                         ->color('danger')
                                         ->hidden(fn($record) => $record->status === TrafficReportStatus::Rejected)
                                         ->schema([
-                                            Select::make('classification')
-                                                ->required()
-                                                ->options(Classification::class),
+                                            Select::make('classification_id')
+                                                ->label('Clasificación')
+                                                ->required(),
 
                                             Textarea::make('review_notes')
                                                 ->required(),
@@ -149,28 +148,29 @@ class TraffictReportResource extends Resource
                                                 ->required(),
                                         ])
                                         ->action(function ($record, $data) {
-                                            $record->classification = $data['classification'];
-                                            $record->administrative_action = $data['administrative_action'];
-                                            $record->review_notes = $data['review_notes'];
-                                            $record->reviewed_at = now();
-                                            $record->reviewed_by = auth()->id();
-                                            $record->status = TrafficReportStatus::Rejected;
+                                            try {
+                                                self::updateStatus($record, $data);
 
-                                            $record->save();
-
-                                            Notification::make()
-                                                ->title('Denuncia rechazada')
-                                                ->success()
-                                                ->send();
+                                                Notification::make()
+                                                    ->title('Denuncia rechazada')
+                                                    ->success()
+                                                    ->send();
+                                            } catch (\Exception $e) {
+                                                Notification::make()
+                                                    ->title('Error al actualizar el estado')
+                                                    ->danger()
+                                                    ->send();
+                                            }
                                         }),
                                     Action::make('accept')
                                         ->label('Aceptar')
                                         ->color('success')
                                         ->hidden(fn($record) => $record->status === TrafficReportStatus::Resolved)
                                         ->schema([
-                                            Select::make('classification')
+                                            Select::make('classification_id')
                                                 ->required()
-                                                ->options(Classification::class),
+                                                ->options(Classification::orderBy('severity_level')->pluck('name', 'id'))
+                                                ->label('Clasificación'),
 
                                             Textarea::make('review_notes')
                                                 ->required(),
@@ -179,19 +179,18 @@ class TraffictReportResource extends Resource
                                                 ->required(),
                                         ])
                                         ->action(function ($record, $data) {
-                                            $record->classification = $data['classification'];
-                                            $record->administrative_action = $data['administrative_action'];
-                                            $record->review_notes = $data['review_notes'];
-                                            $record->reviewed_at = now();
-                                            $record->reviewed_by = auth()->id();
-                                            $record->status = TrafficReportStatus::Resolved;
-
-                                            $record->save();
-
-                                            Notification::make()
-                                                ->title('Denuncia aceptada')
-                                                ->success()
-                                                ->send();
+                                            try {
+                                                self::updateStatus($record, $data);
+                                                Notification::make()
+                                                    ->title('Denuncia aceptada')
+                                                    ->success()
+                                                    ->send();
+                                            } catch (\Exception $e) {
+                                                Notification::make()
+                                                    ->title('Error al actualizar el estado')
+                                                    ->danger()
+                                                    ->send();
+                                            }
                                         })
                                 ])
                         ])
@@ -199,6 +198,26 @@ class TraffictReportResource extends Resource
 
                 ])->columnSpanFull()
         ]);
+    }
+
+    private static function updateStatus(TrafficReport $report, array $data): void
+    {
+        try {
+            $report->classification_id = $data['classification_id'];
+            $report->administrative_action = $data['administrative_action'];
+            $report->review_notes = $data['review_notes'];
+            $report->reviewed_at = now();
+            $report->reviewed_by = auth()->id();
+            $report->status = TrafficReportStatus::Resolved;
+
+            $report->save();
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar el estado de la denuncia: ' . $e->getMessage(), [
+                'report_id' => $report->id,
+                'data' => $data
+            ]);
+            throw new \Exception('Error al actualizar el estado de la denuncia: ');
+        }
     }
 
     public static function getEloquentQuery(): Builder

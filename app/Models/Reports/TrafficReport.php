@@ -2,7 +2,6 @@
 
 namespace App\Models\Reports;
 
-use App\Enums\Classification;
 use App\Enums\TrafficReportStatus;
 use App\Models\Reports\Traits\HasMediaFiles;
 use App\Models\Reports\Traits\HasTrafficReportRelations;
@@ -14,7 +13,7 @@ use Spatie\MediaLibrary\HasMedia;
 #[UsePolicy(TrafficReportPolicies::class)]
 class TrafficReport extends Model implements HasMedia
 {
-    
+
     use HasMediaFiles;
     use HasTrafficReportRelations;
 
@@ -22,10 +21,10 @@ class TrafficReport extends Model implements HasMedia
         'violation_type_id',
         'reported_by',
         'location_id',
+        'classification_id',
         'occurred_at',
         'description',
         'status',
-        'classification',
         'administrative_action',
         'reviewed_by',
         'reviewed_at',
@@ -34,7 +33,6 @@ class TrafficReport extends Model implements HasMedia
 
     protected $casts = [
         'status' => TrafficReportStatus::class,
-        'classification' => Classification::class,
         'occurred_at' => 'datetime',
     ];
 }
